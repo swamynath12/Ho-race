@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏁 Turbo Kids Racer 🏁</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(45deg, #0b1c2f, #1b3b5c);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      padding: 16px;
+    }
+
+    .game-wrapper {
+      background: #2a4c6e;
+      border-radius: 60px 60px 40px 40px;
+      padding: 24px 24px 30px;
+      box-shadow: 0 25px 30px rgba(0, 0, 0, 0.6), inset 0 5px 10px rgba(255, 255, 255, 0.2);
+      border: 4px solid #ffd966;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #13273a;
+      border-radius: 40px 40px 28px 28px;
+      padding: 22px 30px 30px;
+      box-shadow: inset 0 0 0 4px #3d6b94, inset 0 0 20px #00000055;
+    }
+
+    .title {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #ffd966;
+      text-shadow: 0 5px 0 #a15d00, 0 8px 12px black;
+      margin-top: -8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title span {
+      font-size: 2.8rem;
+      filter: drop-shadow(0 6px 0 #a15d00);
+    }
+
+    .score-board {
+      background: #f9e7b3;
+      padding: 8px 28px;
+      border-radius: 100px;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1d3e5c;
+      border: 4px solid #ffb347;
+      box-shadow: inset 0 -6px 0 #bba06a, 0 10px 0 #0f1e2b;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.1s;
+    }
+
+    .score-icon {
+      font-size: 2.2rem;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      border-radius: 30px;
+      box-shadow: 0 0 0 8px #ffb347, 0 20px 30px black;
+      background: #2e5a7a;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+
+    canvas:active {
+      filter: brightness(1.1);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 500px;
+      margin-top: 22px;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      background: #ffcf4a;
+      border: none;
+      border-radius: 60px;
+      padding: 12px 30px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #1d3e5c;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 10px 0 #a15d00, 0 8px 15px black;
+      transition: all 0.07s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-transform: uppercase;
+      flex: 1 0 auto;
+      border: 3px solid #ffe9b6;
+    }
+
+    .btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 4px 0 #a15d00, 0 8px 15px black;
+    }
+
+    .btn.reset-btn {
+      background: #7ec8ff;
+      box-shadow: 0 10px 0 #1f5e8a, 0 8px 15px black;
+      color: #0a2338;
+      border-color: #c1e5ff;
+    }
+
+    .instructions {
+      margin-top: 16px;
+      color: #bbd9ff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-align: center;
+      background: #1d3a55;
+      padding: 8px 24px;
+      border-radius: 40px;
+      border: 2px solid #5e9acf;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .instructions i {
+      font-style: normal;
+      background: #ffd966;
+      color: #13273a;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-wrapper">
+    <div class="game-container">
+      <div class="title">
+        <span>🏎️</span> TURBO RACER <span>🏁</span>
+      </div>
+
+      <div class="score-board" id="scoreDisplay">
+        <span class="score-icon">⭐</span>
+        <span id="scoreValue">0</span>
+      </div>
+
+      <canvas id="gameCanvas" width="500" height="600"></canvas>
+
+      <div class="controls">
+        <button class="btn" id="startBtn">▶ START</button>
+        <button class="btn reset-btn" id="resetBtn">⟲ RESET</button>
+      </div>
+
+      <div class="instructions">
+        <span>⬅️ ➡️ MOVE</span>
+        <i>or</i>
+        <span>TAP LEFT / RIGHT SIDE</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const scoreSpan = document.getElementById('scoreValue');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      // ---------- GAME DIMENSIONS ----------
+      const LANE_COUNT = 3;
+      const LANE_WIDTH = canvas.width / LANE_COUNT;
+      const CAR_WIDTH = 60;
+      const CAR_HEIGHT = 100;
+      // player position is center of car
+      const PLAYER_FIXED_Y = canvas.height - 90; 
+
+      // ---------- GAME STATE ----------
+      let playerLane = 1;                // 0 left, 1 middle, 2 right
+      let score = 0;
+      let gameActive = false;
+      let gameOver = false;             // for crash state
+      let animationFrame = null;
+      
+      // Obstacles array (enemies)
+      let obstacles = [];
+      
+      // Speed & timing
+      let baseSpeed = 3.5;
+      let speed = baseSpeed;
+      let spawnCounter = 0;
+      const SPAWN_RATE = 48;            // frames between spawns
+      
+      // For smooth movement (optional, but we use instant lane switch – kids like responsive)
+      
+      // ---------- HELPER FUNCTIONS ----------
+      function getCarX(lane) {
+        // lane 0,1,2 -> return center X of car in that lane
+        return lane * LANE_WIDTH + LANE_WIDTH / 2;
+      }
+
+      // ---------- RESET / START ----------
+      function resetGame() {
+        // stop animation if running
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = null;
+        }
+        gameActive = false;
+        gameOver = false;
+        score = 0;
+        updateScoreDisplay();
+        playerLane = 1;
+        obstacles = [];
+        speed = baseSpeed;
+        spawnCounter = 0;
+        draw(); // draw fresh static scene
+      }
+
+      function startGame() {
+        if (gameActive) return;        // already running
+        // if game over, reset first
+        if (gameOver) {
+          resetGame();
+        }
+        gameActive = true;
+        gameOver = false;
+        // if there are leftover obstacles? we reset on start anyway, but safe:
+        if (obstacles.length === 0 && score === 0) {
+          // fresh start
+        } else {
+          // if user pressed start after game over? we reset.
+        }
+        // ensure clean state if not fresh
+        if (obstacles.length > 0 || score > 0) {
+          // but if we are restarting after game over we already reset via resetGame? careful
+          // we call reset inside if gameOver, otherwise keep obstacles? but start should be from clean or continue?
+          // For simplicity, if it's not the very first start, we reset.
+          // But to avoid surprises, we reset only if gameOver was true (handled above)
+          // If it's paused? we don't have pause. So START will just continue if already active? but we check gameActive.
+          // So only starts when not active. Good.
+        }
+        // if game was not active but obstacles exist (e.g., after reset it's empty) fine.
+        // final check: if not active and not gameOver, but obstacles exist? could be after reset? reset clears.
+        if (obstacles.length === 0 && score === 0) {
+          // fresh
+        }
+        // start loop
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(gameLoop);
+      }
+
+      // ---------- UPDATE SCORE ----------
+      function updateScoreDisplay() {
+        scoreSpan.textContent = Math.floor(score);
+      }
+
+      // ---------- SPAWN OBSTACLE ----------
+      function spawnObstacle() {
+        const lane = Math.floor(Math.random() * LANE_COUNT);
+        // avoid spawning directly on player if very close? not needed because we use collision
+        obstacles.push({
+          lane: lane,
+          y: -CAR_HEIGHT,           // start above canvas
+          width: CAR_WIDTH,
+          height: CAR_HEIGHT,
+        });
+      }
+
+      // ---------- COLLISION DETECTION (rect) ----------
+      function checkCollision(playerRect, obsRect) {
+        return !(playerRect.x + playerRect.w < obsRect.x ||
+                 obsRect.x + obsRect.w < playerRect.x ||
+                 playerRect.y + playerRect.h < obsRect.y ||
+                 obsRect.y + obsRect.h < playerRect.y);
+      }
+
+      // ---------- UPDATE GAME (called each frame) ----------
+      function update() {
+        if (!gameActive || gameOver) return;
+
+        // 1. increase score over time
+        score += 0.1;
+        updateScoreDisplay();
+
+        // 2. increase difficulty (speed) slowly
+        speed = baseSpeed + Math.floor(score / 300) * 0.8;
+        if (speed > 12) speed = 12; // cap
+
+        // 3. spawn obstacles
+        spawnCounter++;
+        if (spawnCounter >= SPAWN_RATE) {
+          spawnObstacle();
+          spawnCounter = 0;
+          // occasionally double spawn? makes it fun but maybe too hard for kids. just single.
+        }
+
+        // 4. move obstacles downward
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obs = obstacles[i];
+          obs.y += speed;
+          
+          // remove if off screen (below canvas)
+          if (obs.y > canvas.height + 100) {
+            obstacles.splice(i, 1);
+            // bonus: increase score when passing
+            score += 5;
+            updateScoreDisplay();
+          }
+        }
+
+        // 5. collision detection
+        const playerRect = {
+          x: getCarX(playerLane) - CAR_WIDTH/2,
+          y: PLAYER_FIXED_Y - CAR_HEIGHT/2,
+          w: CAR_WIDTH,
+          h: CAR_HEIGHT,
+        };
+
+        for (let obs of obstacles) {
+          const obsRect = {
+            x: getCarX(obs.lane) - obs.width/2,
+            y: obs.y - obs.height/2,
+            w: obs.width,
+            h: obs.height,
+          };
+          if (checkCollision(playerRect, obsRect)) {
+            // GAME OVER
+            gameActive = false;
+            gameOver = true;
+            if (animationFrame) {
+              cancelAnimationFrame(animationFrame);
+              animationFrame = null;
+            }
+            draw(); // draw crash state
+            return;
+          }
+        }
+      }
+
+      // ---------- DRAWING ----------
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // ---- Background: asphalt ----
+        ctx.fillStyle = '#2e5a7a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // ---- road lines (lane dividers) ----
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.lineWidth = 6;
+        ctx.setLineDash([30, 30]);
+        ctx.beginPath();
+        for (let i = 1; i < LANE_COUNT; i++) {
+          const x = i * LANE_WIDTH;
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]); // reset
+
+        // ---- side stripes (fun) ----
+        ctx.fillStyle = '#ffb347';
+        ctx.fillRect(0, 0, 12, canvas.height);
+        ctx.fillRect(canvas.width - 12, 0, 12, canvas.height);
+
+        // ---- draw obstacles (enemy cars) ----
+        obstacles.forEach(obs => {
+          const carX = getCarX(obs.lane) - obs.width/2;
+          const carY = obs.y - obs.height/2;
+          
+          // enemy car body (red/orange with style)
+          ctx.shadowColor = 'black';
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetY = 4;
+          
+          // main body
+          ctx.fillStyle = '#e63946';
+          ctx.beginPath();
+          ctx.roundRect(carX, carY, obs.width, obs.height, 16);
+          ctx.fill();
+
+          // windows
+          ctx.fillStyle = '#a8dadc';
+          ctx.beginPath();
+          ctx.roundRect(carX + 8, carY + 12, obs.width - 16, 22, 8);
+          ctx.fill();
+          ctx.fillStyle = '#1d3557';
+          ctx.beginPath();
+          ctx.roundRect(carX + 10, carY + 48, obs.width - 20, 18, 6);
+          ctx.fill();
+
+          // headlights
+          ctx.fillStyle = '#ffd966';
+          ctx.beginPath();
+          ctx.arc(carX + 12, carY + obs.height - 8, 8, 0, Math.PI * 2);
+          ctx.arc(carX + obs.width - 12, carY + obs.height - 8, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // reset shadow
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
+        });
+
+        // ---- draw player car ----
+        const playerCarX = getCarX(playerLane) - CAR_WIDTH/2;
+        const playerCarY = PLAYER_FIXED_Y - CAR_HEIGHT/2;
+
+        // shadow for player
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 16;
+        ctx.shadowOffsetY = 6;
+
+        // player car body (blue/cyan)
+        ctx.fillStyle = '#4cc9f0';
+        ctx.beginPath();
+        ctx.roundRect(playerCarX, playerCarY, CAR_WIDTH, CAR_HEIGHT, 18);
+        ctx.fill();
+
+        // windows
+        ctx.fillStyle = '#caf0f8';
+        ctx.beginPath();
+        ctx.roundRect(playerCarX + 8, playerCarY + 12, CAR_WIDTH - 16, 24, 10);
+        ctx.fill();
+        ctx.fillStyle = '#023e8a';
+        ctx.beginPath();
+        ctx.roundRect(playerCarX + 10, playerCarY + 50, CAR_WIDTH - 20, 20, 8);
+        ctx.fill();
+
+        // headlights
+        ctx.fillStyle = '#ffea00';
+        ctx.beginPath();
+        ctx.arc(playerCarX + 14, playerCarY + 8, 8, 0, Math.PI * 2);
+        ctx.arc(playerCarX + CAR_WIDTH - 14, playerCarY + 8, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // reset shadow
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // ---- game over overlay ----
+        if (gameOver) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.font = 'bold 52px "Segoe UI", "Poppins", sans-serif';
+          ctx.fillStyle = '#ffd966';
+          ctx.shadowColor = '#a15d00';
+          ctx.shadowBlur = 16;
+          ctx.shadowOffsetY = 6;
+          ctx.textAlign = 'center';
+          ctx.fillText('💥 CRASH!', canvas.width/2, canvas.height/2 - 20);
+          ctx.font = 'bold 36px "Segoe UI", sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText('Press START', canvas.width/2, canvas.height/2 + 60);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
+        } else if (!gameActive && !gameOver && score === 0) {
+          // welcome screen
+          ctx.font = 'bold 40px "Segoe UI", sans-serif';
+          ctx.fillStyle = '#ffd966';
+          ctx.shadowColor = '#a15d00';
+          ctx.shadowBlur = 16;
+          ctx.shadowOffsetY = 6;
+          ctx.textAlign = 'center';
+          ctx.fillText('🏁 READY?', canvas.width/2, canvas.height/2 - 40);
+          ctx.font = 'bold 28px "Segoe UI", sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText('Press START', canvas.width/2, canvas.height/2 + 50);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
+        }
+      }
+
+      // helper canvas roundRect
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        return this;
+      };
+
+      // ---------- GAME LOOP ----------
+      function gameLoop() {
+        if (!gameActive) {
+          // if game not active, stop loop (but we still draw one last time in update)
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+          }
+          return;
+        }
+        update();
+        draw();
+
+        if (gameActive && !gameOver) {
+          animationFrame = requestAnimationFrame(gameLoop);
+        } else {
+          // if game over or inactive, stop animation
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+          }
+        }
+      }
+
+      // ---------- INPUT HANDLING ----------
+      function moveLeft() {
+        if (!gameActive || gameOver) return;
+        if (playerLane > 0) {
+          playerLane--;
+          draw(); // immediate feedback
+        }
+      }
+
+      function moveRight() {
+        if (!gameActive || gameOver) return;
+        if (playerLane < LANE_COUNT - 1) {
+          playerLane++;
+          draw(); // immediate feedback
+        }
+      }
+
+      // keyboard
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a' || e.key === 'A') {
+          e.preventDefault();
+          moveLeft();
+        } else if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd' || e.key === 'D') {
+          e.preventDefault();
+          moveRight();
+        } else if (e.key === ' ' || e.key === 'Space') {
+          e.preventDefault();
+          if (!gameActive) startGame();
+        } else if (e.key === 'r' || e.key === 'R') {
+          resetGame();
+        }
+      });
+
+      // tap / click on canvas: left or right side
+      canvas.addEventListener('click', (e) => {
+        if (!gameActive || gameOver) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;   // canvas physical size / CSS size
+        const canvasX = (e.clientX - rect.left) * scaleX;
+        if (canvasX < canvas.width / 2) {
+          moveLeft();
+        } else {
+          moveRight();
+        }
+      });
+
+      // mobile touch support
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!gameActive || gameOver) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const scaleX = canvas.width / rect.width;
+        const canvasX = (touch.clientX - rect.left) * scaleX;
+        if (canvasX < canvas.width / 2) {
+          moveLeft();
+        } else {
+          moveRight();
+        }
+      }, { passive: false });
+
+      // buttons
+      startBtn.addEventListener('click', startGame);
+      resetBtn.addEventListener('click', () => {
+        resetGame();
+        draw();
+      });
+
+      // ---------- INITIAL RENDER ----------
+      resetGame(); // sets state and draws welcome
+      // ensure canvas focus? not needed
+
+      // handle window blur: keep game running but it's fine
+      // window.addEventListener('blur', () => {}) // do nothing
+
+      // fix for animation loop when tab not active
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && gameActive) {
+          // optional: pause? but kids might lose; we keep running but it's okay.
+          // we can cancel animation to save resources but game will still be active when return
+          // better to keep it simple: no pause.
+        }
+      });
+
+      // redraw on resize? no, canvas fixed size
+    })();
+  </script>
+</body>
+</html>
